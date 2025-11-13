@@ -1,7 +1,8 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import api from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 import React from "react";
+import RoomForm from  "./RoomForm";
 
 // Normaliza a data no formato YYYY-MM-DD (sem fuso)
 const normalizeDate = (dateStr) => {
@@ -28,6 +29,8 @@ async function buscarCEP(cep) {
     return null;
   }
 }
+
+
 
 export default function AdminDashboard() {
   const { user } = useContext(AuthContext);
@@ -171,17 +174,21 @@ export default function AdminDashboard() {
     }
   };
 
-  // === Formulário de Quarto ===
+  /*// === Formulário de Quarto ===
   const RoomForm = ({ room, setRoom, onSave, onCancel }) => {
-  const tagsArray = Array.isArray(room.tags)
-    ? room.tags
-    : typeof room.tags === "string"
-    ? room.tags
+  const tagsArray = useMemo(() => {
+    if (Array.isArray(room.tags)) {
+      return room.tags;
+    }
+    if (typeof room.tags === "string") {
+      return room.tags
         .replace(/[{}"]/g, "")
         .split(",")
         .map((t) => t.trim())
-        .filter(Boolean)
-    : [];
+        .filter(Boolean);
+    }
+    return [];
+  }, [room.tags]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -326,7 +333,7 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-};
+}; */
 
   // === INTERFACE PRINCIPAL ===
   if (!user || user.role !== "admin") {
@@ -527,7 +534,6 @@ export default function AdminDashboard() {
               </button>
             </div>
           )}
-
           {newRoom && (
             <RoomForm
               room={newRoom}
@@ -538,14 +544,17 @@ export default function AdminDashboard() {
           )}
 
           {editingRoom && (
-            <RoomForm
-              room={editingRoom}
-              setRoom={setEditingRoom}
-              onSave={handleRoomSave}
-              onCancel={() => setEditingRoom(null)}
+          <RoomForm
+            room={editingRoom}
+            setRoom={setEditingRoom}
+            onSave={handleRoomSave}
+            onCancel={() => setEditingRoom(null)}
+            setImagePreview={setImagePreview}
+            imagePreview={imagePreview}
+            handleCEPChange={handleCEPChange}
             />
           )}
-
+          
           {!editingRoom && !newRoom && (
             <div className="row">
               {rooms.map((r) => {
